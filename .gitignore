@@ -1,0 +1,15 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+/mvnw
+/mvnw.cmd
+.mvn/wrapper/maven-wrapper.properties
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.DS_Store
+bin/
+*.log
+.env
+.env.local
