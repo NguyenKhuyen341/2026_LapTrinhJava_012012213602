@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>AI Workspace - Soạn Giáo Án Thông Minh - PlanbookAI</title>
+</head>
+<body>
+<div layout:fragment="content" class="h-[calc(100vh-6.5rem)] flex flex-col space-y-3" x-data="aiWorkspace()">
+    <!-- Top Action Bar & Status -->
+    <div class="bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                AI
+            </div>
+            <div>
+                <h1 class="text-base font-bold text-gray-900 leading-none">Không gian Soạn Giáo án Tích hợp Gemini AI</h1>
+                <p class="text-xs text-gray-500 mt-0.5">Quy trình 3 bước: Tải tài liệu nguồn &rarr; Hiệu đính văn bản trích xuất &rarr; AI tạo giáo án chuẩn CV 5512</p>
+            </div>
+        </div>
+
+        <!-- Session Status Badge (TrangThaiPhien) -->
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold"
+                 :class="{
+                     'bg-amber-100 text-amber-800 animate-pulse border border-amber-300': sessionStatus === 'DangXuLy',
+                     'bg-blue-100 text-blue-800 border border-blue-300': sessionStatus === 'DaHoanThanh',
+                     'bg-emerald-100 text-emerald-800 border border-emerald-300': sessionStatus === 'DaLuu'
+                 }">
+                <span class="w-2 h-2 rounded-full"
+                      :class="{
+                          'bg-amber-500': sessionStatus === 'DangXuLy',
+                          'bg-blue-500': sessionStatus === 'DaHoanThanh',
+                          'bg-emerald-500': sessionStatus === 'DaLuu'
+                      }"></span>
+                <span x-text="statusLabel"></span>
+            </div>
+
+            <!-- Action buttons -->
+            <button @click="triggerGeminiGeneration()" :disabled="sessionStatus === 'DangXuLy' || !extractedText"
+                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                <svg x-show="sessionStatus !== 'DangXuLy'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <svg x-show="sessionStatus === 'DangXuLy'" x-cloak class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span x-text="sessionStatus === 'DangXuLy' ? 'Gemini đang xử lý...' : 'Tạo Giáo Án AI'"></span>
+            </button>
+            <button @click="saveLessonPlan()" :disabled="sessionStatus === 'DangXuLy' || !aiResult"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                Lưu vào Thư viện
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== THREE-PANE SPLIT-SCREEN ==================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 overflow-hidden min-h-0">
+
+        <!-- 1. KHUNG NGUỒN (LEFT - 3 cols) -->
+        <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+            <div class="p-3.5 border-b border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">1</span>
+                    <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wide">Khung Nguồn (PDF)</h3>
+                </div>
+                <span class="text-[10px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-medium">Source Preview</span>
+            </div>
+
+            <!-- Upload Area & File Preview -->
+            <div class="p-4 flex-1 overflow-y-auto flex flex-col">
+                <div class="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 rounded-2xl p-6 text-center cursor-pointer transition mb-4"
+                     @click="$refs.fileInput.click()">
+                    <input type="file" x-ref="fileInput" @change="handleFileUpload($event)" class="hidden" accept=".pdf,.doc,.docx">
+                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm mx-auto flex items-center justify-center text-indigo-600 mb-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    </div>
+                    <p class="text-xs font-bold text-gray-800">Tải lên Giáo trình / PDF SGK</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Hỗ trợ định dạng PDF, Word (Tối đa 20MB)</p>
+                </div>
+
+                <!-- Uploaded Document Card -->
+                <div x-show="fileName" x-cloak class="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <div class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs flex-shrink-0">PDF</div>
+                        <div class="truncate">
+                            <p class="text-xs font-semibold text-gray-900 truncate" x-text="fileName"></p>
+                            <p class="text-[10px] text-gray-500" x-text="fileSize"></p>
+                        </div>
+                    </div>
+                    <button @click="removeFile()" class="text-gray-400 hover:text-red-500 text-sm font-bold">&times;</button>
+                </div>
+
+                <!-- PDF Document Mock Preview -->
+                <div class="flex-1 bg-slate-100 rounded-xl border border-gray-200 p-3 overflow-hidden flex flex-col justify-center items-center text-center">
+                    <template x-if="fileName">
+                        <div class="w-full h-full bg-white rounded-lg shadow-inner p-3 overflow-y-auto text-left text-[11px] text-gray-600 font-serif leading-relaxed">
+                            <p class="font-bold text-center text-gray-800 mb-2">BÀI 15: AXIT SUNFURIC VÀ MUỐI SUNFAT</p>
+                            <p class="mb-2"><strong>A. HÓA TÍNH CỦA AXIT SUNFURIC ĐẶC:</strong></p>
+                            <p class="mb-1">1. Tính oxi hóa mạnh: H2SO4 đặc nóng tác dụng với hầu hết kim loại (trừ Au, Pt), phi kim (C, S, P) và nhiều hợp chất khử...</p>
+                            <p class="mb-1">2. Tính háo nước: H2SO4 đặc hút nước mạnh từ các chất hữu cơ như đường saccarozơ ($C_{12}H_{22}O_{11}$)...</p>
+                            <p class="mt-2 text-[10px] text-gray-400 italic text-center">[Trang 1/4 - SGK Hóa học 10]</p>
+                        </div>
+                    </template>
+                    <template x-if="!fileName">
+                        <div class="text-gray-400 text-xs">
+                            <svg class="w-8 h-8 mx-auto mb-1 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Chưa có tệp nào được tải lên
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. KHUNG VĂN BẢN TRÍCH XUẤT (MIDDLE - 4 cols) -->
+        <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+            <div class="p-3.5 border-b border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-xs font-bold flex items-center justify-center">2</span>
+                    <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wide">Văn Bản Trích Xuất</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-gray-400" x-text="extractedText.length + ' ký tự'"></span>
+                    <button @click="isEditingText = !isEditingText"
+                            :class="isEditingText ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300'"
+                            class="text-[10px] px-2 py-0.5 rounded font-semibold transition">
+                        <span x-text="isEditingText ? 'Lưu sửa' : 'Chỉnh sửa'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Editable Text Area -->
+            <div class="p-3 flex-1 flex flex-col overflow-hidden">
+                <div class="mb-2 flex items-center justify-between text-[11px] text-gray-500">
+                    <span>Văn bản trích xuất (VanBanTrichXuat)</span>
+                    <span class="text-indigo-600 font-medium cursor-pointer" @click="loadSampleText()">Tải mẫu gợi ý</span>
+                </div>
+                <textarea x-model="extractedText" :readonly="!isEditingText"
+                          class="w-full flex-1 border border-gray-200 rounded-xl p-3 text-xs font-sans leading-relaxed focus:ring-2 focus:ring-indigo-500 resize-none overflow-y-auto"
+                          :class="isEditingText ? 'bg-amber-50/20 border-indigo-300' : 'bg-gray-50/50'"
+                          placeholder="Văn bản trích xuất tự động từ PDF sẽ xuất hiện ở đây. Giáo viên có thể chỉnh sửa, thêm bớt ghi chú trước khi bấm Tạo Giáo Án AI..."></textarea>
+            </div>
+        </div>
+
+        <!-- 3. KHUNG KẾT QUẢ AI (RIGHT - 5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+            <div class="p-3.5 border-b border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center">3</span>
+                    <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wide">Kết Quả Giáo Án AI</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">Chuẩn CV 5512</span>
+                </div>
+            </div>
+
+            <!-- AI Result Content -->
+            <div class="p-4 flex-1 overflow-y-auto">
+                <!-- Skeleton Loading State when Calling Gemini AI -->
+                <div x-show="sessionStatus === 'DangXuLy'" x-cloak class="space-y-4 animate-pulse">
+                    <div class="h-6 bg-gray-200 rounded-lg w-3/4"></div>
+                    <div class="space-y-2">
+                        <div class="h-4 bg-gray-200 rounded w-full"></div>
+                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                        <div class="h-4 bg-gray-200 rounded w-4/6"></div>
+                    </div>
+                    <div class="h-28 bg-indigo-50/50 rounded-xl border border-indigo-100 p-3 space-y-2">
+                        <div class="h-3 bg-indigo-200 rounded w-1/3"></div>
+                        <div class="h-3 bg-indigo-100 rounded w-full"></div>
+                        <div class="h-3 bg-indigo-100 rounded w-4/5"></div>
+                    </div>
+                    <div class="text-center py-4 text-xs font-medium text-indigo-600 flex items-center justify-center gap-2">
+                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span>Gemini 1.5 Pro đang phân tích dữ liệu hóa học & sinh giáo án...</span>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="sessionStatus !== 'DangXuLy' && !aiResult" class="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                    </div>
+                    <p class="text-xs font-bold text-gray-700">Chưa có kết quả giáo án</p>
+                    <p class="text-[11px] text-gray-400 max-w-xs mt-1">Bấm nút "Tạo Giáo Án AI" ở trên để Gemini tổng hợp bài học theo 4 hoạt động sư phạm chuẩn.</p>
+                </div>
+
+                <!-- Rendered AI Lesson Plan -->
+                <div x-show="sessionStatus !== 'DangXuLy' && aiResult" x-cloak class="space-y-4 text-xs text-gray-800 leading-relaxed font-sans">
+                    <div class="border-b border-gray-200 pb-3">
+                        <span class="text-[10px] font-bold text-indigo-600 uppercase">KẾ HOẠCH BÀI DẠY (GIÁO ÁN)</span>
+                        <h2 class="text-sm font-bold text-gray-900 mt-0.5">BÀI: AXIT SUNFURIC (H2SO4) ĐẶC VÀ TÍNH CHẤT NỔI BẬT</h2>
+                        <p class="text-[11px] text-gray-500">Môn: Hóa học • Lớp 10 • Thời lượng: 2 tiết (90 phút)</p>
+                    </div>
+
+                    <!-- I. MỤC TIÊU -->
+                    <div class="bg-indigo-50/40 p-3 rounded-xl border border-indigo-100">
+                        <h4 class="font-bold text-indigo-900 mb-1">I. MỤC TIÊU BÀI DẠY</h4>
+                        <ul class="list-disc list-inside space-y-1 text-gray-700 pl-1">
+                            <li><strong>Kiến thức:</strong> Hiểu rõ tính chất oxi hóa mạnh và tính háo nước mãnh liệt của dung dịch $H_2SO_4$ đặc.</li>
+                            <li><strong>Năng lực:</strong> Viết đúng các phương trình ion thu gọn và cân bằng electron cho phản ứng: $Cu + 2H_2SO_4 \rightarrow CuSO_4 + SO_2\uparrow + 2H_2O$.</li>
+                            <li><strong>Phẩm chất:</strong> Rèn luyện thái độ cẩn trọng, tuân thủ an toàn phòng thí nghiệm hóa học.</li>
+                        </ul>
+                    </div>
+
+                    <!-- II. TIẾN TRÌNH 4 HOẠT ĐỘNG -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-gray-900">II. TIẾN TRÌNH DẠY HỌC (4 HOẠT ĐỘNG CHUẨN CV 5512)</h4>
+                        
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                            <span class="font-bold text-indigo-700">Hoạt động 1: Mở đầu / Khởi động (10 phút)</span>
+                            <p class="mt-1 text-gray-600">GV chiếu video thí nghiệm rót $H_2SO_4$ đặc vào cốc đường mía ($C_{12}H_{22}O_{11}$). Yêu cầu HS quan sát hiện tượng đường hóa than và trào lên.</p>
+                        </div>
+
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                            <span class="font-bold text-indigo-700">Hoạt động 2: Hình thành kiến thức mới (45 phút)</span>
+                            <p class="mt-1 text-gray-600">- Nhóm 1-2: Phân tích tính oxi hóa của lưu huỳnh trong số oxi hóa $+6$.</p>
+                            <p class="text-gray-600">- Nhóm 3-4: Viết phản ứng với Fe, Cu và giải thích hiện tượng thụ động hóa với $Al, Fe, Cr$ ở nhiệt độ nguội.</p>
+                        </div>
+
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                            <span class="font-bold text-indigo-700">Hoạt động 3: Luyện tập (25 phút)</span>
+                            <p class="mt-1 text-gray-600">Cho HS giải phiếu học tập 5 câu hỏi trắc nghiệm và 1 bài tập tính toán lượng khí $SO_2$ thoát ra khi hòa tan hoàn toàn 6.4g Cu.</p>
+                        </div>
+
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                            <span class="font-bold text-indigo-700">Hoạt động 4: Vận dụng & Mở rộng (10 phút)</span>
+                            <p class="mt-1 text-gray-600">Nêu nguyên tắc an toàn khi pha loãng axit: "Rót từ từ axit vào nước, tuyệt đối không làm ngược lại".</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function aiWorkspace() {
+            return {
+                sessionStatus: 'DaHoanThanh', // DangXuLy, DaHoanThanh, DaLuu
+                fileName: 'SGK_HoaHoc_10_Bai15.pdf',
+                fileSize: '4.2 MB',
+                isEditingText: false,
+                extractedText: 'BÀI 15: AXIT SUNFURIC VÀ MUỐI SUNFAT\n\n1. Tính chất vật lý:\n- Axit sunfuric là chất lỏng sánh như dầu, không màu, không bay hơi, nặng gần gấp hai lần nước (D = 1.84 g/cm3).\n- Tan vô hạn trong nước và tỏa rất nhiều nhiệt.\n\n2. Tính chất hóa học của H2SO4 đặc:\n- Tính oxi hóa rất mạnh: Oxi hóa được Cu, S, C...\n- Tính háo nước: Hút nước từ các hợp chất cacbohiđrat tạo thành than (C).',
+                aiResult: true,
+                get statusLabel() {
+                    const map = {
+                        'DangXuLy': 'Đang xử lý (AI Generating)',
+                        'DaHoanThanh': 'Đã hoàn thành',
+                        'DaLuu': 'Đã lưu thư viện'
+                    };
+                    return map[this.sessionStatus] || this.sessionStatus;
+                },
+                handleFileUpload(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.fileName = file.name;
+                        this.fileSize = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+                        this.extractedText = 'Đang trích xuất nội dung từ ' + file.name + '...\n\n[Trích xuất OCR thành công]: Nội dung giáo trình Hóa học với công thức H2SO4 và các thí nghiệm liên quan.';
+                    }
+                },
+                removeFile() {
+                    this.fileName = '';
+                    this.fileSize = '';
+                    this.extractedText = '';
+                    this.aiResult = false;
+                },
+                loadSampleText() {
+                    this.extractedText = 'BÀI 15: AXIT SUNFURIC VÀ MUỐI SUNFAT\n\n1. Tính chất vật lý: Lỏng sánh, D=1.84, tỏa nhiều nhiệt khi tan trong nước.\n2. Tính chất hóa học: Oxi hóa mạnh (+6 -> +4, 0, -2) và háo nước mãnh liệt.';
+                },
+                triggerGeminiGeneration() {
+                    this.sessionStatus = 'DangXuLy';
+                    setTimeout(() => {
+                        this.sessionStatus = 'DaHoanThanh';
+                        this.aiResult = true;
+                    }, 1500);
+                },
+                saveLessonPlan() {
+                    this.sessionStatus = 'DaLuu';
+                    alert('Đã lưu giáo án thành công vào kho học liệu của bạn!');
+                }
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

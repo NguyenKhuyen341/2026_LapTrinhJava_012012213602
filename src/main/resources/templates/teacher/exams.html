@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Trình Tạo Đề Thi Thông Minh - PlanbookAI</title>
+</head>
+<body>
+<div layout:fragment="content" class="space-y-6" x-data="examBuilder()">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-200 gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">Trình Tạo Đề Thi Thông Minh</h1>
+            <p class="text-sm text-gray-500">Tự động bốc ngẫu nhiên câu hỏi theo ma trận kiến thức, đảm bảo tổng điểm luôn chuẩn 10.0</p>
+        </div>
+        <div class="flex gap-2">
+            <button @click="generateRandomExam()"
+                    class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                Tạo Ngẫu Nhiên (Chuẩn 10.0)
+            </button>
+            <button @click="saveExam()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-sm shadow-sm transition">
+                Lưu Đề Thi
+            </button>
+        </div>
+    </div>
+
+    <!-- Exam Matrix Configuration Panel -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span>⚙️ Thiết lập Tiêu chí Ma trận Đề thi</span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Tiêu đề đề thi</label>
+                <input type="text" x-model="examTitle" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Môn học & Khối lớp</label>
+                <select x-model="subjectGrade" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-indigo-500">
+                    <option>Hóa học - Khối 10</option>
+                    <option>Hóa học - Khối 11</option>
+                    <option>Hóa học - Khối 12</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Thời gian làm bài</label>
+                <select x-model="duration" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-indigo-500">
+                    <option value="15">15 phút</option>
+                    <option value="45">45 phút (1 tiết)</option>
+                    <option value="90">90 phút (Học kỳ)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Số lượng câu hỏi</label>
+                <input type="number" x-model.number="questionCount" min="4" max="40" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-indigo-500">
+            </div>
+        </div>
+
+        <!-- Difficulty Distribution Sliders -->
+        <div class="mt-6 pt-4 border-t border-gray-100">
+            <p class="text-xs font-bold text-gray-700 uppercase mb-3">Tỷ lệ Phân bổ Mức độ Khó (Tổng: 100%)</p>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="p-3 bg-green-50/50 rounded-xl border border-green-200">
+                    <div class="flex justify-between text-xs font-semibold text-green-800 mb-1">
+                        <span>Nhận biết (Dễ)</span>
+                        <span x-text="dist.de + '%'"></span>
+                    </div>
+                    <input type="range" x-model.number="dist.de" min="0" max="100" class="w-full accent-green-600">
+                </div>
+                <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-200">
+                    <div class="flex justify-between text-xs font-semibold text-blue-800 mb-1">
+                        <span>Thông hiểu (Trung bình)</span>
+                        <span x-text="dist.tb + '%'"></span>
+                    </div>
+                    <input type="range" x-model.number="dist.tb" min="0" max="100" class="w-full accent-blue-600">
+                </div>
+                <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200">
+                    <div class="flex justify-between text-xs font-semibold text-amber-800 mb-1">
+                        <span>Vận dụng (Khó)</span>
+                        <span x-text="dist.kho + '%'"></span>
+                    </div>
+                    <input type="range" x-model.number="dist.kho" min="0" max="100" class="w-full accent-amber-600">
+                </div>
+                <div class="p-3 bg-red-50/50 rounded-xl border border-red-200">
+                    <div class="flex justify-between text-xs font-semibold text-red-800 mb-1">
+                        <span>Vận dụng cao (Rất khó)</span>
+                        <span x-text="dist.ratKho + '%'"></span>
+                    </div>
+                    <input type="range" x-model.number="dist.ratKho" min="0" max="100" class="w-full accent-red-600">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Preview & Total Score Bar -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-5 border-b border-gray-200 flex flex-wrap justify-between items-center gap-3 bg-gray-50/60">
+            <div>
+                <h3 class="text-base font-bold text-gray-900" x-text="examTitle"></h3>
+                <p class="text-xs text-gray-500" x-text="'Thời gian: ' + duration + ' phút • Số câu: ' + questions.length + ' câu'"></p>
+            </div>
+            <!-- Standard 10.0 Total Score Indicator -->
+            <div class="flex items-center gap-3">
+                <div class="px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-extrabold shadow-sm flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>TỔNG ĐIỂM: <span x-text="totalScore.toFixed(1)"></span> / 10.0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions List -->
+        <div class="p-6 space-y-6 divide-y divide-gray-100">
+            <template x-for="(q, idx) in questions" :key="q.id">
+                <div class="pt-4 first:pt-0">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-indigo-700 text-sm" x-text="'Câu ' + (idx + 1) + ':'"></span>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                                  :class="{
+                                      'bg-green-100 text-green-800': q.mucDo === 'DE',
+                                      'bg-blue-100 text-blue-800': q.mucDo === 'TRUNG_BINH',
+                                      'bg-amber-100 text-amber-800': q.mucDo === 'KHO',
+                                      'bg-red-100 text-red-800': q.mucDo === 'RAT_KHO'
+                                  }"
+                                  x-text="getDiffLabel(q.mucDo)"></span>
+                            <span class="text-xs text-gray-400" x-text="'(' + q.chuDe + ')'"></span>
+                        </div>
+                        <span class="text-xs font-bold text-indigo-900 bg-indigo-50 px-2 py-1 rounded" x-text="q.diem.toFixed(2) + ' điểm'"></span>
+                    </div>
+
+                    <p class="text-sm text-gray-800 font-medium mb-3 pl-2" x-text="q.content"></p>
+
+                    <!-- Options Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2">
+                        <div class="p-2 rounded-lg border text-xs flex items-center gap-2"
+                             :class="q.correct === 'A' ? 'bg-emerald-50 border-emerald-300 font-semibold text-emerald-900' : 'bg-gray-50 border-gray-200 text-gray-700'">
+                            <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]"
+                                  :class="q.correct === 'A' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'">A</span>
+                            <span x-text="q.optA"></span>
+                        </div>
+                        <div class="p-2 rounded-lg border text-xs flex items-center gap-2"
+                             :class="q.correct === 'B' ? 'bg-emerald-50 border-emerald-300 font-semibold text-emerald-900' : 'bg-gray-50 border-gray-200 text-gray-700'">
+                            <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]"
+                                  :class="q.correct === 'B' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'">B</span>
+                            <span x-text="q.optB"></span>
+                        </div>
+                        <div class="p-2 rounded-lg border text-xs flex items-center gap-2"
+                             :class="q.correct === 'C' ? 'bg-emerald-50 border-emerald-300 font-semibold text-emerald-900' : 'bg-gray-50 border-gray-200 text-gray-700'">
+                            <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]"
+                                  :class="q.correct === 'C' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'">C</span>
+                            <span x-text="q.optC"></span>
+                        </div>
+                        <div class="p-2 rounded-lg border text-xs flex items-center gap-2"
+                             :class="q.correct === 'D' ? 'bg-emerald-50 border-emerald-300 font-semibold text-emerald-900' : 'bg-gray-50 border-gray-200 text-gray-700'">
+                            <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]"
+                                  :class="q.correct === 'D' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'">D</span>
+                            <span x-text="q.optD"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function examBuilder() {
+            return {
+                examTitle: 'Đề Kiểm Tra 1 Tiết Hóa Học 10 - Chương Axit & Oxi Hóa',
+                subjectGrade: 'Hóa học - Khối 10',
+                duration: '45',
+                questionCount: 4,
+                dist: { de: 40, tb: 30, kho: 20, ratKho: 10 },
+                questions: [
+                    {
+                        id: 1,
+                        mucDo: 'DE',
+                        chuDe: 'Axit Sunfuric',
+                        content: 'Công thức hóa học của axit sunfuric là gì?',
+                        optA: 'H2SO4', optB: 'HCl', optC: 'HNO3', optD: 'H2SO3',
+                        correct: 'A',
+                        diem: 2.5
+                    },
+                    {
+                        id: 2,
+                        mucDo: 'TRUNG_BINH',
+                        chuDe: 'Tính oxi hóa',
+                        content: 'Kim loại nào sau đây bị thụ động hóa trong dung dịch H2SO4 đặc, nguội?',
+                        optA: 'Cu', optB: 'Al và Fe', optC: 'Zn', optD: 'Mg',
+                        correct: 'B',
+                        diem: 2.5
+                    },
+                    {
+                        id: 3,
+                        mucDo: 'KHO',
+                        chuDe: 'Tính toán Hóa học',
+                        content: 'Cho 6,4 gam Cu tác dụng hoàn toàn với lượng dư H2SO4 đặc nóng. Thể tích khí SO2 (đktc) thu được là:',
+                        optA: '1,12 lít', optB: '2,24 lít', optC: '3,36 lít', optD: '4,48 lít',
+                        correct: 'B',
+                        diem: 2.5
+                    },
+                    {
+                        id: 4,
+                        mucDo: 'RAT_KHO',
+                        chuDe: 'Hỗn hợp phức tạp',
+                        content: 'Hòa tan hoàn toàn m gam hỗn hợp gồm Fe, FeO, Fe2O3 và Fe3O4 trong dung dịch H2SO4 đặc nóng dư thu được 4,48 lít SO2...',
+                        optA: '16,8 gam', optB: '23,2 gam', optC: '20,0 gam', optD: '18,4 gam',
+                        correct: 'C',
+                        diem: 2.5
+                    }
+                ],
+                get totalScore() {
+                    return this.questions.reduce((sum, q) => sum + q.diem, 0);
+                },
+                getDiffLabel(code) {
+                    const map = { 'DE': 'Dễ', 'TRUNG_BINH': 'Trung bình', 'KHO': 'Khó', 'RAT_KHO': 'Rất khó' };
+                    return map[code] || code;
+                },
+                generateRandomExam() {
+                    const pointPerQ = 10.0 / this.questionCount;
+                    this.questions.forEach(q => q.diem = pointPerQ);
+                    alert('Đã bốc ngẫu nhiên ' + this.questionCount + ' câu hỏi từ Ngân hàng câu hỏi theo tỷ lệ ma trận! Tổng điểm đạt 10.0.');
+                },
+                saveExam() {
+                    alert('Đã lưu đề thi thành công vào hệ thống!');
+                }
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

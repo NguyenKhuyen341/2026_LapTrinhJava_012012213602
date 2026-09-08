@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Chấm Thi OMR & Nhận Diện OpenCV - PlanbookAI</title>
+</head>
+<body>
+<div layout:fragment="content" class="space-y-6" x-data="omrGrader()">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-200 gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <h1 class="text-xl font-bold text-gray-900">Module Chấm Thi OMR & OpenCV</h1>
+                <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">Supabase Storage</span>
+            </div>
+            <p class="text-sm text-gray-500">Tự động nhận diện phiếu tô trắc nghiệm bằng thị giác máy tính OpenCV và đề xuất AI Feedback</p>
+        </div>
+        <div class="flex gap-2">
+            <button @click="$refs.sheetUpload.click()"
+                    class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium shadow-sm transition text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                Tải Lên Phiếu Bài Làm
+            </button>
+            <input type="file" x-ref="sheetUpload" @change="handleImageUpload($event)" accept="image/*" class="hidden">
+        </div>
+    </div>
+
+    <!-- Processing Progress Bar (OpenCV OCR) -->
+    <div x-show="isProcessing" x-cloak class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <div class="flex justify-between items-center text-sm font-semibold text-gray-700">
+            <span class="flex items-center gap-2">
+                <svg class="animate-spin w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span x-text="processStepText"></span>
+            </span>
+            <span class="text-indigo-600 font-bold" x-text="progressPercent + '%'"></span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-500 to-emerald-500 h-3 rounded-full transition-all duration-300"
+                 :style="'width: ' + progressPercent + '%'"></div>
+        </div>
+        <div class="grid grid-cols-4 text-[11px] text-gray-400 font-medium text-center">
+            <span :class="progressPercent >= 25 ? 'text-indigo-600 font-bold' : ''">1. Tải lên Supabase</span>
+            <span :class="progressPercent >= 50 ? 'text-indigo-600 font-bold' : ''">2. Tiền xử lý OpenCV</span>
+            <span :class="progressPercent >= 75 ? 'text-indigo-600 font-bold' : ''">3. Nhận diện ô tô OMR</span>
+            <span :class="progressPercent >= 100 ? 'text-emerald-600 font-bold' : ''">4. AI sinh Feedback</span>
+        </div>
+    </div>
+
+    <!-- ==================== SPLIT-SCREEN GRADING RESULTS ==================== -->
+    <div x-show="isFinished" x-cloak class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT: Phiếu bài làm gốc với vùng lỗi khoanh tròn đỏ bằng OpenCV (6 cols) -->
+        <div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                    <h3 class="text-sm font-bold text-gray-900">Ảnh Phiếu Gốc & Vùng Nhận Diện OpenCV</h3>
+                </div>
+                <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-semibold">Khoanh đỏ: Lỗi sai</span>
+            </div>
+
+            <div class="p-6 flex-1 flex flex-col items-center justify-center bg-slate-900 relative min-h-[420px] rounded-b-2xl overflow-hidden">
+                <!-- Mock Answer Sheet with OpenCV bounding boxes -->
+                <div class="w-full max-w-sm bg-white p-5 rounded-lg shadow-xl relative text-xs font-mono text-gray-700 select-none">
+                    <!-- Sheet Header -->
+                    <div class="border-b-2 border-gray-800 pb-2 mb-3 text-center">
+                        <p class="font-bold text-gray-900 text-sm">PHIẾU TRẢ LỜI TRẮC NGHIỆM</p>
+                        <p class="text-[10px] text-gray-500">Mã Đề: 101 • SBD: HS10-003 • Thí sinh: Phạm Minh Cường</p>
+                    </div>
+
+                    <!-- Bubbles rows -->
+                    <div class="space-y-3">
+                        <!-- Q1: Correct -->
+                        <div class="flex items-center justify-between p-1 bg-gray-50 rounded">
+                            <span class="font-bold">01.</span>
+                            <div class="flex gap-2">
+                                <span class="w-5 h-5 rounded-full bg-indigo-900 text-white font-bold flex items-center justify-center text-[10px]">A</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">B</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">C</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">D</span>
+                            </div>
+                            <span class="text-emerald-600 font-bold">✓ Đúng</span>
+                        </div>
+
+                        <!-- Q2: WRONG (OpenCV Red Circle Highlight) -->
+                        <div class="flex items-center justify-between p-1 bg-red-50/60 rounded border-2 border-red-500 relative">
+                            <span class="font-bold">02.</span>
+                            <div class="flex gap-2">
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">A</span>
+                                <span class="w-5 h-5 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[10px] ring-2 ring-red-400">B</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">C</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">D</span>
+                            </div>
+                            <span class="text-red-600 font-bold">✗ Sai (Đ.A: C)</span>
+                        </div>
+
+                        <!-- Q3: Correct -->
+                        <div class="flex items-center justify-between p-1 bg-gray-50 rounded">
+                            <span class="font-bold">03.</span>
+                            <div class="flex gap-2">
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">A</span>
+                                <span class="w-5 h-5 rounded-full bg-indigo-900 text-white font-bold flex items-center justify-center text-[10px]">B</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">C</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">D</span>
+                            </div>
+                            <span class="text-emerald-600 font-bold">✓ Đúng</span>
+                        </div>
+
+                        <!-- Q4: WRONG (OpenCV Red Circle Highlight) -->
+                        <div class="flex items-center justify-between p-1 bg-red-50/60 rounded border-2 border-red-500 relative">
+                            <span class="font-bold">04.</span>
+                            <div class="flex gap-2">
+                                <span class="w-5 h-5 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-[10px] ring-2 ring-red-400">A</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">B</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">C</span>
+                                <span class="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center text-[10px]">D</span>
+                            </div>
+                            <span class="text-red-600 font-bold">✗ Sai (Đ.A: D)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: AI-suggested Feedback Panel (6 cols) -->
+        <div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 bg-indigo-600 rounded-full"></span>
+                    AI-suggested Feedback Panel (Bảng Gợi Ý AI)
+                </h3>
+                <span class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">Gemini Powered</span>
+            </div>
+
+            <div class="p-6 space-y-5 flex-1 overflow-y-auto">
+                <!-- Score summary card -->
+                <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-emerald-50 rounded-2xl p-5 border border-indigo-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase">Điểm Số Đạt Được</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span class="text-4xl font-extrabold text-indigo-700">5.0</span>
+                            <span class="text-sm text-gray-500 font-medium">/ 10.0</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">Số câu đúng: <strong class="text-emerald-600">2 / 4 câu</strong> (50%)</p>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-800 flex flex-col items-center justify-center font-bold text-xs border-2 border-amber-300">
+                        <span>Trung bình</span>
+                    </div>
+                </div>
+
+                <!-- AI Analysis & Feedback based on wrong answers -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Phân tích lỗ hổng kiến thức từ Gemini AI:</h4>
+
+                    <!-- Feedback for Question 2 -->
+                    <div class="p-3.5 bg-rose-50/70 border border-rose-200 rounded-xl text-xs space-y-1.5">
+                        <div class="flex items-center justify-between font-bold text-rose-900">
+                            <span>Lỗi sai ở Câu 02 (Chủ đề: Thụ động hóa kim loại)</span>
+                            <span class="text-[10px] bg-rose-200 px-1.5 py-0.5 rounded">Nhầm lẫn Al/Fe</span>
+                        </div>
+                        <p class="text-gray-700">Học sinh chọn <strong>B (Al)</strong> nhưng đáp án đúng là <strong>C (Al và Fe)</strong>. Học sinh đã quên rằng cả Sắt (Fe) và Crom (Cr) cũng bị thụ động hóa trong $H_2SO_4$ đặc nguội.</p>
+                        <p class="text-indigo-700 font-semibold text-[11px] pt-1">💡 Lời khuyên ôn tập: Cần nhắc học sinh ghi nhớ quy tắc 'Nhôm, Sắt, Crom trơ trong axit đặc nguội'.</p>
+                    </div>
+
+                    <!-- Feedback for Question 4 -->
+                    <div class="p-3.5 bg-rose-50/70 border border-rose-200 rounded-xl text-xs space-y-1.5">
+                        <div class="flex items-center justify-between font-bold text-rose-900">
+                            <span>Lỗi sai ở Câu 04 (Chủ đề: Bảo toàn Electron trong hỗn hợp oxit)</span>
+                            <span class="text-[10px] bg-rose-200 px-1.5 py-0.5 rounded">Sai bước quy đổi</span>
+                        </div>
+                        <p class="text-gray-700">Học sinh chọn <strong>A</strong> do nhầm lẫn hệ số trao đổi mol electron giữa Fe và Fe3O4.</p>
+                        <p class="text-indigo-700 font-semibold text-[11px] pt-1">💡 Lời khuyên ôn tập: Giao thêm 3 bài tập về phương pháp quy đổi nguyên tử Fe và O.</p>
+                    </div>
+
+                    <!-- AI Suggested Teacher Comment -->
+                    <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                        <label class="block text-xs font-bold text-indigo-900 uppercase mb-1">Lời nhận xét gợi ý cho học sinh (Có thể sửa):</label>
+                        <textarea rows="2" class="w-full text-xs text-gray-700 bg-white border border-indigo-200 rounded-lg p-2 focus:ring-indigo-500">Em nắm tốt các khái niệm cơ bản nhưng cần cẩn thận hơn ở các câu hỏi tổng hợp nhiều kim loại và phương pháp bảo toàn electron.</textarea>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition">Chấm phiếu tiếp theo</button>
+                    <button class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">Lưu kết quả & Gửi HS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function omrGrader() {
+            return {
+                isProcessing: false,
+                isFinished: true,
+                progressPercent: 100,
+                processStepText: 'Hoàn tất chấm điểm OpenCV & AI Feedback',
+                handleImageUpload(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.isProcessing = true;
+                        this.isFinished = false;
+                        this.progressPercent = 10;
+                        this.processStepText = 'Đang tải ảnh lên Supabase Storage...';
+
+                        setTimeout(() => {
+                            this.progressPercent = 45;
+                            this.processStepText = 'OpenCV đang căn chỉnh góc xoay & nhận diện khung phiếu...';
+                        }, 600);
+
+                        setTimeout(() => {
+                            this.progressPercent = 80;
+                            this.processStepText = 'Đang đọc tọa độ ô tô & đối chiếu đáp án...';
+                        }, 1200);
+
+                        setTimeout(() => {
+                            this.progressPercent = 100;
+                            this.processStepText = 'Gemini AI đang tổng hợp nhận xét lỗi sai...';
+                            setTimeout(() => {
+                                this.isProcessing = false;
+                                this.isFinished = true;
+                            }, 500);
+                        }, 1800);
+                    }
+                }
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

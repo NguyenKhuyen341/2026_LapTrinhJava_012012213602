@@ -46,9 +46,23 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Cho phép truy cập công khai không cần auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                // Phân quyền chi tiết (RBAC) cho các API nghiệp vụ
+                // Cho phép truy cập công khai không cần auth cho Auth API, Web Views & Static Assets
+                .requestMatchers(
+                    "/",
+                    "/login",
+                    "/auth/**",
+                    "/api/v1/auth/**",
+                    "/admin/**",
+                    "/manager/**",
+                    "/staff/**",
+                    "/teacher/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/static/**",
+                    "/favicon.ico"
+                ).permitAll()
+                // Phân quyền chi tiết (RBAC) cho các API nghiệp vụ REST
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/manager/**").hasRole("MANAGER")
                 .requestMatchers("/api/v1/staff/**").hasRole("STAFF")

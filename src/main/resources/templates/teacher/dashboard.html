@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Bảng Điều Khiển Giáo Viên - PlanbookAI</title>
+</head>
+<body>
+<div layout:fragment="content" class="space-y-6" x-data="teacherDashboard()">
+    <!-- Welcome Banner (VIP Teacher Suite) -->
+    <div class="bg-gradient-to-r from-primary-900 via-indigo-800 to-indigo-900 rounded-3xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+        <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs font-semibold mb-3 border border-amber-400/30">
+                <span>⭐ Phân hệ VIP - Trợ lý Gemini AI</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Xin chào, Thầy/Cô Nguyễn Văn A!</h1>
+            <p class="text-indigo-200 text-sm mt-1 max-w-xl">Chào mừng bạn quay lại hệ thống soạn thảo giáo án và chấm thi thông minh PlanbookAI.</p>
+        </div>
+        <div class="flex flex-wrap gap-3 relative z-10">
+            <a th:href="@{/teacher/workspace}" class="px-4 py-2.5 bg-white text-primary-900 font-semibold rounded-xl text-sm shadow-md hover:bg-indigo-50 transition flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Soạn Giáo Án AI
+            </a>
+            <a th:href="@{/teacher/omr}" class="px-4 py-2.5 bg-indigo-600/80 hover:bg-indigo-600 text-white font-semibold rounded-xl text-sm border border-indigo-400/30 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+                Chấm Phiếu OMR
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lớp Đang Dạy</p>
+                <h3 class="text-2xl font-bold text-gray-900 mt-1">4 Lớp</h3>
+                <span class="text-xs text-emerald-600 font-medium">165 Học sinh</span>
+            </div>
+            <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Giáo Án Đã Tạo</p>
+                <h3 class="text-2xl font-bold text-gray-900 mt-1">28 Bài</h3>
+                <span class="text-xs text-indigo-600 font-medium">+5 tuần này</span>
+            </div>
+            <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Đề Thi Trắc Nghiệm</p>
+                <h3 class="text-2xl font-bold text-gray-900 mt-1">12 Đề</h3>
+                <span class="text-xs text-blue-600 font-medium">Chuẩn 10.0 điểm</span>
+            </div>
+            <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Phiếu Đã Chấm OMR</p>
+                <h3 class="text-2xl font-bold text-gray-900 mt-1">320 Phiếu</h3>
+                <span class="text-xs text-emerald-600 font-medium">Độ chính xác 99.4%</span>
+            </div>
+            <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân tích Hiệu suất Học sinh (Charts: Proficiency Dashboard) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Chart 1: Điểm trung bình và tiến độ hiểu bài theo thời gian (Line chart) -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900">Biểu đồ Mức độ Hiểu bài (Proficiency)</h3>
+                    <p class="text-xs text-gray-500">Theo dõi điểm trung bình qua các bài kiểm tra theo tháng</p>
+                </div>
+                <select class="border border-gray-300 rounded-lg text-xs p-1.5 focus:ring-indigo-500">
+                    <option>Tất cả các lớp</option>
+                    <option>Lớp 10A1</option>
+                    <option>Lớp 11B2</option>
+                    <option>Lớp 12A3</option>
+                </select>
+            </div>
+            <div class="h-64">
+                <canvas id="proficiencyLineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Phân bố điểm & Mức độ đạt chuẩn theo lớp (Bar chart) -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900">Phổ điểm các lớp môn Hóa học</h3>
+                    <p class="text-xs text-gray-500">Tỷ lệ Giỏi, Khá, Trung bình và Yếu theo từng lớp</p>
+                </div>
+                <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md font-semibold">Học kỳ 1</span>
+            </div>
+            <div class="h-64">
+                <canvas id="gradeDistributionBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Lesson Plans & OMR Results -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Recent AI Lesson Plans -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-900">Giáo án soạn gần đây (Workspace AI)</h3>
+                <a th:href="@{/teacher/workspace}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">Tạo mới &rarr;</a>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3.5 bg-gray-50 hover:bg-indigo-50/50 rounded-xl border border-gray-100 flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">10A</div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-800">Liên kết hóa học & Tinh thể Ion</h4>
+                            <p class="text-xs text-gray-500">Môn Hóa học • 2 tiết • Trích xuất từ PDF SGK KNTT</p>
+                        </div>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 bg-emerald-100 text-emerald-800 font-semibold rounded-full">Đã lưu</span>
+                </div>
+                <div class="p-3.5 bg-gray-50 hover:bg-indigo-50/50 rounded-xl border border-gray-100 flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">12A</div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-800">Polime và Vật liệu Polime tổng hợp</h4>
+                            <p class="text-xs text-gray-500">Môn Hóa học • 3 tiết • Sinh bởi Gemini 1.5</p>
+                        </div>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 bg-blue-100 text-blue-800 font-semibold rounded-full">Hoàn thành</span>
+                </div>
+                <div class="p-3.5 bg-gray-50 hover:bg-indigo-50/50 rounded-xl border border-gray-100 flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">11B</div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-800">Hiđrocacbon thơm - Benzen và dãy đồng đẳng</h4>
+                            <p class="text-xs text-gray-500">Môn Hóa học • 2 tiết • Đang soạn dở</p>
+                        </div>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 bg-amber-100 text-amber-800 font-semibold rounded-full">Sơ thảo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent OMR Batches -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-900">Đợt chấm OMR gần nhất</h3>
+                <a th:href="@{/teacher/omr}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">Xem tất cả</a>
+            </div>
+            <div class="space-y-4">
+                <div class="border-b border-gray-100 pb-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-semibold text-gray-800">Kiểm tra 15p - Axit Cacboxylic</span>
+                        <span class="text-xs font-bold text-emerald-600">8.2 TB</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Lớp 11B2 • 42 bài • OpenCV OCR xong</p>
+                </div>
+                <div class="border-b border-gray-100 pb-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-semibold text-gray-800">Giữa kỳ 1 - Hóa học Đại cương</span>
+                        <span class="text-xs font-bold text-indigo-600">7.6 TB</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Lớp 10A1 • 40 bài • Đã tạo AI Feedback</p>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-semibold text-gray-800">Khảo sát chuyên đề Oxi Hóa Khử</span>
+                        <span class="text-xs font-bold text-emerald-600">8.9 TB</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Lớp 12A3 • 45 bài • Hoàn tất</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function teacherDashboard() {
+            return {
+                init() {
+                    this.renderLineChart();
+                    this.renderBarChart();
+                },
+                renderLineChart() {
+                    const ctx = document.getElementById('proficiencyLineChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12', 'Tháng 1', 'Tháng 2'],
+                            datasets: [{
+                                label: 'Điểm TB Học sinh (Thang 10)',
+                                data: [6.8, 7.2, 7.5, 7.9, 8.1, 8.4],
+                                borderColor: '#4f46e5',
+                                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#4f46e5',
+                                pointRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { min: 0, max: 10, ticks: { stepSize: 2 } }
+                            }
+                        }
+                    });
+                },
+                renderBarChart() {
+                    const ctx = document.getElementById('gradeDistributionBarChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['10A1', '10A2', '11B1', '11B2', '12A1'],
+                            datasets: [
+                                { label: 'Giỏi (>=8.0)', data: [18, 14, 20, 16, 22], backgroundColor: '#10b981' },
+                                { label: 'Khá (6.5-7.9)', data: [16, 20, 15, 18, 14], backgroundColor: '#6366f1' },
+                                { label: 'TB/Yếu (<6.5)', data: [6, 8, 5, 6, 4], backgroundColor: '#f59e0b' }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: { stacked: true },
+                                y: { stacked: true }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

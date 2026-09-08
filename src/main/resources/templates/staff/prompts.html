@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Quản lý Mẫu Prompt AI - PlanbookAI</title>
+</head>
+<body>
+<div layout:fragment="content" class="space-y-6" x-data="promptManager()">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-200 gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">Quản lý Mẫu Prompt AI</h1>
+            <p class="text-sm text-gray-500">Cấu hình các prompt mồi chuẩn hóa để AI Gemini tạo giáo án và bài tập chính xác</p>
+        </div>
+        <button @click="openAddModal()"
+                class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium shadow-sm transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Tạo Prompt Mới
+        </button>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-500 font-medium">Lọc theo loại:</span>
+            <button @click="filterType = 'ALL'"
+                    :class="filterType === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition">Tất cả</button>
+            <button @click="filterType = 'GIAO_AN'"
+                    :class="filterType === 'GIAO_AN' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition">Soạn Giáo án</button>
+            <button @click="filterType = 'CAU_HOI'"
+                    :class="filterType === 'CAU_HOI' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition">Tạo Câu hỏi</button>
+            <button @click="filterType = 'PHAN_TICH'"
+                    :class="filterType === 'PHAN_TICH' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition">Phân tích OMR</button>
+        </div>
+        <div class="relative w-full md:w-64">
+            <input type="text" x-model="searchQuery" placeholder="Tìm prompt theo tên..."
+                   class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+    </div>
+
+    <!-- Prompts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <template x-for="(item, idx) in filteredPrompts" :key="item.id">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between hover:border-indigo-200 transition">
+                <div>
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                  :class="{
+                                      'bg-purple-100 text-purple-800': item.type === 'GIAO_AN',
+                                      'bg-blue-100 text-blue-800': item.type === 'CAU_HOI',
+                                      'bg-amber-100 text-amber-800': item.type === 'PHAN_TICH'
+                                  }"
+                                  x-text="getTypeName(item.type)">
+                            </span>
+                            <h3 class="text-base font-bold text-gray-900 mt-2" x-text="item.title"></h3>
+                        </div>
+                        <span class="text-xs text-gray-400" x-text="item.updatedAt"></span>
+                    </div>
+
+                    <p class="text-sm text-gray-600 mb-4" x-text="item.description"></p>
+
+                    <!-- Prompt Preview Box -->
+                    <div class="bg-slate-900 text-slate-200 p-3.5 rounded-xl font-mono text-xs overflow-x-auto border border-slate-800 mb-4">
+                        <span class="text-emerald-400">// System Prompt mồi:</span><br>
+                        <p class="whitespace-pre-wrap mt-1 text-slate-300" x-text="item.content"></p>
+                    </div>
+
+                    <!-- Placeholders list -->
+                    <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                        <span class="text-xs text-gray-400 mr-1">Biến đầu vào:</span>
+                        <template x-for="token in item.variables" :key="token">
+                            <span class="px-2 py-0.5 bg-gray-100 text-indigo-700 text-xs font-mono font-medium rounded" x-text="token"></span>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100 mt-2">
+                    <span class="text-xs text-gray-500">Mô hình: <strong class="text-gray-700">Gemini 1.5 Pro</strong></span>
+                    <div class="flex items-center gap-2">
+                        <button @click="editPrompt(item)" class="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition">Chỉnh sửa</button>
+                        <button @click="deletePrompt(item.id)" class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">Xóa</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Modal Form -->
+    <div x-show="isModalOpen" x-cloak class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden" @click.away="isModalOpen = false">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-900" x-text="form.id ? 'Chỉnh sửa Prompt AI' : 'Tạo Prompt Mồi Mới'"></h3>
+                <button @click="isModalOpen = false" class="text-gray-400 hover:text-gray-600 text-xl font-semibold">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên gợi nhớ của Prompt</label>
+                    <input type="text" x-model="form.title" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Loại Prompt</label>
+                        <select x-model="form.type" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500">
+                            <option value="GIAO_AN">Soạn Giáo án chuẩn</option>
+                            <option value="CAU_HOI">Tạo Câu hỏi trắc nghiệm</option>
+                            <option value="PHAN_TICH">Phân tích kết quả OMR</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả ngắn</label>
+                        <input type="text" x-model="form.description" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-medium text-gray-700">Nội dung Prompt mồi (System Instruction)</label>
+                        <span class="text-xs text-indigo-600 font-medium">Hỗ trợ cú pháp {{variable}}</span>
+                    </div>
+                    <textarea x-model="form.content" rows="6"
+                              class="w-full border border-gray-300 rounded-xl p-3 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                              placeholder="Bạn là chuyên gia sư phạm Hóa học. Hãy tạo giáo án cho chủ đề {{topic}} lớp {{grade}} theo chuẩn Công văn 5512..."></textarea>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button @click="isModalOpen = false" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-xl">Hủy</button>
+                <button @click="savePrompt()" class="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm">Lưu Prompt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function promptManager() {
+            return {
+                filterType: 'ALL',
+                searchQuery: '',
+                isModalOpen: false,
+                prompts: [
+                    {
+                        id: 1,
+                        title: 'Mẫu Tạo Giáo án Hóa học Chuẩn CV 5512',
+                        type: 'GIAO_AN',
+                        description: 'Khung prompt định dạng Markdown 4 bước: Khởi động, Hình thành kiến thức, Luyện tập, Vận dụng.',
+                        content: 'Bạn là chuyên gia sư phạm Hóa học THPT. Dựa trên tài liệu {{document_text}}, hãy biên soạn giáo án cho chủ đề {{topic}} theo cấu trúc: 1. Mục tiêu (Kiến thức, Năng lực, Phẩm chất), 2. Thiết bị dạy học, 3. Tiến trình bài giảng (4 hoạt động). Chú ý sử dụng đúng ký hiệu KaTeX cho công thức hóa học.',
+                        variables: ['{{document_text}}', '{{topic}}', '{{grade}}'],
+                        updatedAt: '08/09/2026'
+                    },
+                    {
+                        id: 2,
+                        title: 'Tạo Câu hỏi Trắc nghiệm 4 Mức độ',
+                        type: 'CAU_HOI',
+                        description: 'Tự động tạo câu hỏi trắc nghiệm Hóa có lời giải chi tiết và công thức KaTeX.',
+                        content: 'Hãy tạo 5 câu hỏi trắc nghiệm Hóa học về {{topic}} với mức độ {{difficulty}}. Mỗi câu phải có 4 đáp án A, B, C, D kèm đáp án đúng và lời giải chi tiết sử dụng định dạng KaTeX ($...$).',
+                        variables: ['{{topic}}', '{{difficulty}}', '{{count}}'],
+                        updatedAt: '06/09/2026'
+                    },
+                    {
+                        id: 3,
+                        title: 'AI Feedback cho bài thi OMR',
+                        type: 'PHAN_TICH',
+                        description: 'Phân tích vùng lỗi sai của học sinh từ OpenCV và gợi ý lời nhận xét sư phạm.',
+                        content: 'Dựa trên danh sách các câu sai: {{wrong_questions}} của học sinh trong bài thi {{exam_title}}, hãy đưa ra phân tích lỗ hổng kiến thức và lời khuyên ôn tập ngắn gọn, mang tính khích lệ học sinh.',
+                        variables: ['{{wrong_questions}}', '{{exam_title}}'],
+                        updatedAt: '04/09/2026'
+                    }
+                ],
+                form: { id: null, title: '', type: 'GIAO_AN', description: '', content: '' },
+                getTypeName(type) {
+                    const map = { 'GIAO_AN': 'Soạn Giáo án', 'CAU_HOI': 'Tạo Câu hỏi', 'PHAN_TICH': 'Phân tích OMR' };
+                    return map[type] || type;
+                },
+                get filteredPrompts() {
+                    return this.prompts.filter(p => {
+                        const matchType = this.filterType === 'ALL' || p.type === this.filterType;
+                        const matchSearch = p.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                                            p.description.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchType && matchSearch;
+                    });
+                },
+                openAddModal() {
+                    this.form = { id: null, title: '', type: 'GIAO_AN', description: '', content: '' };
+                    this.isModalOpen = true;
+                },
+                editPrompt(item) {
+                    this.form = { ...item };
+                    this.isModalOpen = true;
+                },
+                savePrompt() {
+                    if (this.form.id) {
+                        const idx = this.prompts.findIndex(p => p.id === this.form.id);
+                        if (idx !== -1) this.prompts[idx] = { ...this.prompts[idx], ...this.form, updatedAt: 'Hôm nay' };
+                    } else {
+                        this.prompts.unshift({
+                            ...this.form,
+                            id: Date.now(),
+                            variables: ['{{document_text}}'],
+                            updatedAt: 'Hôm nay'
+                        });
+                    }
+                    this.isModalOpen = false;
+                },
+                deletePrompt(id) {
+                    if (confirm('Bạn có chắc chắn muốn xóa Prompt này?')) {
+                        this.prompts = this.prompts.filter(p => p.id !== id);
+                    }
+                }
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

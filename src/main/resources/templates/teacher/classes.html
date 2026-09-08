@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Quản lý Lớp học & Học sinh - PlanbookAI</title>
+</head>
+<body>
+<div layout:fragment="content" class="space-y-6" x-data="classesManager()">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-200 gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">Quản lý Lớp học & Học sinh</h1>
+            <p class="text-sm text-gray-500">Theo dõi danh sách học sinh, điểm trung bình và lịch sử thi cử từng lớp</p>
+        </div>
+        <div class="flex gap-2">
+            <button @click="openAddStudentModal()"
+                    class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium shadow-sm transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                Thêm Học Sinh
+            </button>
+        </div>
+    </div>
+
+    <!-- Classes Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <template x-for="c in classes" :key="c.id">
+            <div @click="selectedClass = c.name"
+                 :class="selectedClass === c.name ? 'ring-2 ring-indigo-600 border-indigo-600 bg-indigo-50/20' : 'border-gray-200 hover:border-indigo-300 bg-white'"
+                 class="p-5 rounded-2xl shadow-sm border cursor-pointer transition flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md" x-text="c.grade"></span>
+                        <h3 class="text-xl font-bold text-gray-900 mt-1" x-text="'Lớp ' + c.name"></h3>
+                    </div>
+                    <span class="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full" x-text="'ĐTB: ' + c.avgScore"></span>
+                </div>
+                <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                    <span x-text="'Sĩ số: ' + c.studentCount + ' học sinh'"></span>
+                    <span class="text-indigo-600 font-semibold" x-text="selectedClass === c.name ? '● Đang chọn' : 'Xem danh sách &rarr;'"></span>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Student Table for Selected Class -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-gray-50/50">
+            <div>
+                <h2 class="font-bold text-gray-900" x-text="'Danh sách học sinh lớp ' + selectedClass"></h2>
+                <p class="text-xs text-gray-500">Dữ liệu kết nối tự động với phân hệ Chấm thi OMR</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <input type="text" x-model="searchQuery" placeholder="Tìm học sinh theo tên/MSHS..."
+                       class="border border-gray-300 rounded-xl px-3 py-1.5 text-xs focus:ring-indigo-500 w-60">
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-600">
+                <thead class="bg-gray-50 text-xs text-gray-500 uppercase font-semibold">
+                    <tr>
+                        <th class="p-4">Mã số HS</th>
+                        <th class="p-4">Họ và Tên</th>
+                        <th class="p-4">Lớp</th>
+                        <th class="p-4">Số bài đã thi</th>
+                        <th class="p-4">Điểm Trung Bình</th>
+                        <th class="p-4">Đánh giá nhanh</th>
+                        <th class="p-4 text-right">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <template x-for="st in filteredStudents" :key="st.id">
+                        <tr class="hover:bg-gray-50/80 transition">
+                            <td class="p-4 font-mono font-bold text-indigo-700 text-xs" x-text="st.maSo"></td>
+                            <td class="p-4 font-semibold text-gray-900" x-text="st.hoTen"></td>
+                            <td class="p-4 text-xs font-medium text-gray-600" x-text="st.lop"></td>
+                            <td class="p-4" x-text="st.soLanThi + ' lần'"></td>
+                            <td class="p-4">
+                                <span class="font-bold"
+                                      :class="st.diemTB >= 8.0 ? 'text-emerald-600' : (st.diemTB >= 6.5 ? 'text-indigo-600' : 'text-amber-600')"
+                                      x-text="st.diemTB.toFixed(1)"></span>
+                            </td>
+                            <td class="p-4">
+                                <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                                      :class="st.diemTB >= 8.0 ? 'bg-emerald-100 text-emerald-800' : (st.diemTB >= 6.5 ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')"
+                                      x-text="st.diemTB >= 8.0 ? 'Xuất sắc' : (st.diemTB >= 6.5 ? 'Đạt chuẩn' : 'Cần bồi dưỡng')">
+                                </span>
+                            </td>
+                            <td class="p-4 text-right space-x-2">
+                                <button @click="editStudent(st)" class="text-xs font-medium text-indigo-600 hover:text-indigo-900">Sửa</button>
+                                <button @click="deleteStudent(st.id)" class="text-xs font-medium text-red-600 hover:text-red-900">Xóa</button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div x-show="isStudentModalOpen" x-cloak class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" @click.away="isStudentModalOpen = false">
+            <div class="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="text-base font-bold text-gray-900" x-text="studentForm.id ? 'Cập nhật Học sinh' : 'Thêm Học Sinh Mới'"></h3>
+                <button @click="isStudentModalOpen = false" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Mã số học sinh (MSHS)</label>
+                    <input type="text" x-model="studentForm.maSo" placeholder="VD: HS2026-001" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Họ và tên</label>
+                    <input type="text" x-model="studentForm.hoTen" placeholder="VD: Trần Hoàng Nam" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Lớp học</label>
+                    <select x-model="studentForm.lop" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm">
+                        <option value="10A1">Lớp 10A1</option>
+                        <option value="11B2">Lớp 11B2</option>
+                        <option value="12A3">Lớp 12A3</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
+                <button @click="isStudentModalOpen = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-xl">Hủy</button>
+                <button @click="saveStudent()" class="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm">Lưu Học Sinh</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function classesManager() {
+            return {
+                selectedClass: '10A1',
+                searchQuery: '',
+                isStudentModalOpen: false,
+                classes: [
+                    { id: 1, name: '10A1', grade: 'Khối 10', studentCount: 40, avgScore: '8.4' },
+                    { id: 2, name: '11B2', grade: 'Khối 11', studentCount: 42, avgScore: '7.8' },
+                    { id: 3, name: '12A3', grade: 'Khối 12', studentCount: 45, avgScore: '8.7' }
+                ],
+                students: [
+                    { id: 1, maSo: 'HS10-001', hoTen: 'Nguyễn Văn An', lop: '10A1', soLanThi: 4, diemTB: 8.8 },
+                    { id: 2, maSo: 'HS10-002', hoTen: 'Lê Thị Bình', lop: '10A1', soLanThi: 4, diemTB: 9.2 },
+                    { id: 3, maSo: 'HS10-003', hoTen: 'Phạm Minh Cường', lop: '10A1', soLanThi: 4, diemTB: 7.5 },
+                    { id: 4, maSo: 'HS10-004', hoTen: 'Đỗ Hải Đăng', lop: '10A1', soLanThi: 3, diemTB: 6.2 },
+                    { id: 5, maSo: 'HS11-001', hoTen: 'Trần Gia Hân', lop: '11B2', soLanThi: 5, diemTB: 8.0 },
+                    { id: 6, maSo: 'HS11-002', hoTen: 'Vũ Quốc Khánh', lop: '11B2', soLanThi: 5, diemTB: 7.2 },
+                    { id: 7, maSo: 'HS12-001', hoTen: 'Bùi Mai Linh', lop: '12A3', soLanThi: 6, diemTB: 9.5 }
+                ],
+                studentForm: { id: null, maSo: '', hoTen: '', lop: '10A1' },
+                get filteredStudents() {
+                    return this.students.filter(st => {
+                        const matchClass = st.lop === this.selectedClass;
+                        const matchSearch = st.hoTen.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                                            st.maSo.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchClass && matchSearch;
+                    });
+                },
+                openAddStudentModal() {
+                    this.studentForm = { id: null, maSo: 'HS' + Date.now().toString().slice(-4), hoTen: '', lop: this.selectedClass };
+                    this.isStudentModalOpen = true;
+                },
+                editStudent(st) {
+                    this.studentForm = { ...st };
+                    this.isStudentModalOpen = true;
+                },
+                saveStudent() {
+                    if (this.studentForm.id) {
+                        const idx = this.students.findIndex(s => s.id === this.studentForm.id);
+                        if (idx !== -1) this.students[idx] = { ...this.students[idx], ...this.studentForm };
+                    } else {
+                        this.students.push({
+                            ...this.studentForm,
+                            id: Date.now(),
+                            soLanThi: 0,
+                            diemTB: 0.0
+                        });
+                    }
+                    this.isStudentModalOpen = false;
+                },
+                deleteStudent(id) {
+                    if (confirm('Bạn có chắc chắn muốn xóa học sinh này khỏi danh sách lớp?')) {
+                        this.students = this.students.filter(s => s.id !== id);
+                    }
+                }
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>
