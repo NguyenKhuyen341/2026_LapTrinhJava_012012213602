@@ -32,8 +32,9 @@ public class CauHoi {
     @Column(name = "dap_an_d", nullable = false, columnDefinition = "TEXT")
     private String dapAnD;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "dap_an_dung", nullable = false, length = 1)
-    private String dapAnDung;
+    private NhanLuaChon dapAnDung;
 
     @Column(name = "mon_hoc", nullable = false, length = 50)
     private String monHoc = "Hóa học";

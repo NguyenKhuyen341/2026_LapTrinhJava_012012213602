@@ -63,6 +63,7 @@ public class SecurityConfig {
                     "/favicon.ico"
                 ).permitAll()
                 // Phân quyền chi tiết (RBAC) cho các API nghiệp vụ REST
+                .requestMatchers("/questions/**").hasRole("STAFF")
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/manager/**").hasRole("MANAGER")
                 .requestMatchers("/api/v1/staff/**").hasRole("STAFF")
