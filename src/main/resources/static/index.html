@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanbookAI - Nền Tảng Quản Lý Giáo Án & Đề Thi Thông Minh</title>
+  
+  <!-- Modern Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Ambient Glow Effects -->
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-icon">⚡</div>
+          <div>
+            <div class="brand-title">PlanbookAI</div>
+            <div class="brand-sub">Smart Teacher Portal</div>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <div class="nav-item active" data-tab="dashboard">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Tổng quan</span>
+          </div>
+          <div class="nav-item" data-tab="giaoan">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Quản lý Giáo án</span>
+          </div>
+          <div class="nav-item" data-tab="dethi">
+            <i class="fa-solid fa-file-pen"></i>
+            <span>Đề thi & Câu hỏi</span>
+          </div>
+          <div class="nav-item" data-tab="hocsinh">
+            <i class="fa-solid fa-user-graduate"></i>
+            <span>Quản lý Học sinh</span>
+          </div>
+          <div class="nav-item" data-tab="ai-generator">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Trợ lý AI Planbook</span>
+          </div>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar">GV</div>
+        <div class="user-info">
+          <div class="user-name">ThS. Nguyễn Văn An</div>
+          <div class="user-role">Giáo viên Khoa CNTT</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-search">
+          <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+          <input type="text" placeholder="Tìm kiếm giáo án, đề thi, bài giảng...">
+        </div>
+
+        <div class="header-actions">
+          <button class="btn btn-secondary btn-sm" id="btn-open-auth">
+            <i class="fa-solid fa-user-lock"></i> Đăng nhập / Đăng ký
+          </button>
+          <button class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-plus"></i> Soạn giáo án mới
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views Container -->
+      <div class="content-body">
+        
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-view active">
+          <h1 class="page-title">Bảng Điều Khiển Tổng Quan</h1>
+          <p class="page-desc">Chào mừng quay trở lại, ThS. Nguyễn Văn An! Dưới đây là tóm tắt hoạt động hệ thống PlanbookAI.</p>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">📚</div>
+              <div>
+                <div class="stat-val" id="stat-giaoan">0</div>
+                <div class="stat-lbl">Giáo án đã tạo</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">📝</div>
+              <div>
+                <div class="stat-val" id="stat-dethi">0</div>
+                <div class="stat-lbl">Đề thi trong ngân hàng</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">👨‍🎓</div>
+              <div>
+                <div class="stat-val" id="stat-hocsinh">0</div>
+                <div class="stat-lbl">Học sinh theo dõi</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">🤖</div>
+              <div>
+                <div class="stat-val" id="stat-ai">0</div>
+                <div class="stat-lbl">Lượt AI hỗ trợ sinh</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Activity List -->
+          <div class="table-card" style="padding: 24px;">
+            <div class="section-header">
+              <h3 class="section-title">⚡ Hoạt động gần đây</h3>
+              <button class="btn btn-secondary btn-sm">Xem tất cả</button>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 14px;">
+              - Bạn đã tạo giáo án <strong>"Bài 15: Cấu trúc điều kiện trong Java"</strong> 2 giờ trước.<br>
+              - Đề thi giữa kỳ môn Java Căn Bản đã được phê duyệt tự động.<br>
+              - Mô hình AI vừa hỗ trợ sinh 5 câu hỏi trắc nghiệm mức độ Khó.
+            </p>
+          </div>
+        </section>
+
+        <!-- TAB 2: QUẢN LÝ GIÁO ÁN -->
+        <section id="tab-giaoan" class="tab-view">
+          <div class="section-header">
+            <div>
+              <h1 class="page-title">Quản Lý Giáo Án (Lesson Plans)</h1>
+              <p class="page-desc">Danh sách và phân loại tất cả các bài giảng, giáo án đã được biên soạn.</p>
+            </div>
+            <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tạo Giáo Án Mới</button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" id="search-giaoan" class="form-control" placeholder="Lọc theo tên bài học..." style="width: 280px;">
+            <select class="filter-select">
+              <option value="ALL">Tất cả môn học</option>
+              <option value="JAVA">Lập trình Java</option>
+              <option value="DB">Cơ sở dữ liệu</option>
+            </select>
+            <select class="filter-select">
+              <option value="ALL">Tất cả trạng thái</option>
+              <option value="PUBLISHED">PUBLISHED (Đã xuất bản)</option>
+              <option value="DRAFT">DRAFT (Bản nháp)</option>
+            </select>
+          </div>
+
+          <div class="table-card">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mã GA</th>
+                  <th>Tên Bài Học / Giáo Án</th>
+                  <th>Môn Học</th>
+                  <th>Khối / Lớp</th>
+                  <th>Trạng Thái</th>
+                  <th>Ngày Tạo</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="giaoan-tbody">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- TAB 3: ĐỀ THI & CÂU HỎI -->
+        <section id="tab-dethi" class="tab-view">
+          <div class="section-header">
+            <div>
+              <h1 class="page-title">Ngân Hàng Đề Thi & Câu Hỏi</h1>
+              <p class="page-desc">Quản lý ma trận đề thi và bộ câu hỏi đánh giá kết quả học tập.</p>
+            </div>
+            <button class="btn btn-primary"><i class="fa-solid fa-folder-plus"></i> Tạo Đề Thi</button>
+          </div>
+
+          <div class="table-card">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mã Đề</th>
+                  <th>Tiêu Đề Bài Thi / Kiểm Tra</th>
+                  <th>Thời Gian</th>
+                  <th>Số Câu Hoi</th>
+                  <th>Trạng Thái</th>
+                  <th>Ngày Tạo</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="dethi-tbody">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- TAB 4: QUẢN LÝ HỌC SINH -->
+        <section id="tab-hocsinh" class="tab-view">
+          <h1 class="page-title">Quản Lý Danh Sách Học Sinh</h1>
+          <p class="page-desc">Theo dõi thông tin học sinh, điểm trung bình môn và kết quả đánh giá.</p>
+
+          <div class="table-card">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mã Học Sinh</th>
+                  <th>Họ và Tên</th>
+                  <th>Lớp Học</th>
+                  <th>Điểm Trung Bình</th>
+                  <th>Xếp Loại</th>
+                </tr>
+              </thead>
+              <tbody id="hocsinh-tbody">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- TAB 5: AI GENERATOR -->
+        <section id="tab-ai-generator" class="tab-view">
+          <h1 class="page-title">Trợ Lý AI Planbook - Generator</h1>
+          <p class="page-desc">Tự động hóa xây dựng kế hoạch giảng dạy và ma trận câu hỏi bằng trí tuệ nhân tạo.</p>
+
+          <div class="ai-box">
+            <div class="ai-header">
+              <span class="ai-badge">PRO AI MODEL</span>
+              <h3 style="font-size: 18px; font-weight: 700;">Sinh Giáo Án & Đề Thi Tự Động</h3>
+            </div>
+
+            <div class="form-group">
+              <label for="ai-prompt-input">Nhập chủ đề bài học hoặc môn học bạn muốn biên soạn:</label>
+              <input type="text" id="ai-prompt-input" class="form-control" value="Cấu trúc Lập trình Hướng đối tượng OOP trong Java" placeholder="Ví dụ: Vòng lặp For trong Java, Thuật toán sắp xếp...">
+            </div>
+
+            <button class="btn btn-primary" id="btn-generate-ai">
+              ✨ AI Sinh Giáo Án Tự Động
+            </button>
+
+            <div class="ai-output-box" id="ai-output-box">
+Kết quả sinh từ AI sẽ xuất hiện tại đây... Hãy nhập chủ đề và nhấn nút Sinh Giáo Án.
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- AUTH MODAL (Đăng nhập / Đăng ký) -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Cổng Đăng Nhập PlanbookAI</h3>
+        <button class="modal-close" id="btn-close-auth">&times;</button>
+      </div>
+
+      <form onsubmit="event.preventDefault(); alert('Đã ghi nhận thao tác đăng nhập mẫu trên FE!');">
+        <div class="form-group">
+          <label>Tên đăng nhập / Email:</label>
+          <input type="text" class="form-control" placeholder="teacher@planbookai.com" value="teacher1">
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu:</label>
+          <input type="password" class="form-control" value="••••••••">
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Đăng Nhập</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('auth-modal').classList.remove('active')">Đóng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/mock-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
