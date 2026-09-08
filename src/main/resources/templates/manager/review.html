@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Duyệt Nội Dung</title>
+</head>
+<body>
+<div layout:fragment="content" x-data="{ filterType: '', filterStatus: '', showRejectModal: false, rejectItem: null, rejectReason: '' }">
+    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Kiểm duyệt Nội dung</h1>
+            <p class="text-sm text-gray-500 mt-1">Duyệt các câu hỏi, prompt AI và giáo án mẫu từ giáo viên</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4">
+        <div class="w-full md:w-64">
+            <select x-model="filterType" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="">Tất cả Loại nội dung</option>
+                <option value="question">Câu hỏi</option>
+                <option value="prompt">Prompt AI</option>
+                <option value="plan">Giáo án mẫu</option>
+            </select>
+        </div>
+        <div class="w-full md:w-64">
+            <select x-model="filterStatus" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="">Tất cả Trạng thái</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="approved">Đã duyệt</option>
+                <option value="rejected">Từ chối</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-5 flex-1">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Câu hỏi</span>
+                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Chờ duyệt</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Câu hỏi trắc nghiệm Vật lý 12</h3>
+                <p class="text-sm text-gray-600 line-clamp-3 mb-4">Một con lắc lò xo gồm vật nhỏ và lò xo nhẹ có độ cứng k, dao động điều hòa dọc theo trục Ox. Lực kéo về tác dụng lên vật có độ lớn tỉ lệ với...</p>
+                <div class="text-xs text-gray-500 flex items-center justify-between mt-auto">
+                    <span>Đăng bởi: Nguyễn Thị Giáo Viên</span>
+                    <span>09/09/2026</span>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button @click="showRejectModal = true; rejectItem = 'Câu hỏi trắc nghiệm Vật lý 12'" class="px-3 py-1.5 border border-red-300 text-red-700 rounded text-sm font-medium hover:bg-red-50 transition-colors">Từ chối</button>
+                <button class="px-3 py-1.5 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700 transition-colors shadow-sm">Phê duyệt</button>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-5 flex-1">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">Prompt AI</span>
+                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Chờ duyệt</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Prompt tạo hoạt động nhóm</h3>
+                <p class="text-sm text-gray-600 line-clamp-3 mb-4">"Đóng vai là một giáo viên sáng tạo, hãy thiết kế một trò chơi 15 phút cho học sinh lớp 10 để tìm hiểu về cấu trúc tế bào nhân thực..."</p>
+                <div class="text-xs text-gray-500 flex items-center justify-between mt-auto">
+                    <span>Đăng bởi: Trần Văn Phương pháp</span>
+                    <span>08/09/2026</span>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button @click="showRejectModal = true; rejectItem = 'Prompt tạo hoạt động nhóm'" class="px-3 py-1.5 border border-red-300 text-red-700 rounded text-sm font-medium hover:bg-red-50 transition-colors">Từ chối</button>
+                <button class="px-3 py-1.5 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700 transition-colors shadow-sm">Phê duyệt</button>
+            </div>
+        </div>
+
+        <!-- Card 3 (Approved) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-5 flex-1 opacity-75">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800">Giáo án mẫu</span>
+                    <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Đã duyệt</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">Bài 1: Mệnh đề toán học</h3>
+                <p class="text-sm text-gray-600 line-clamp-3 mb-4">Giáo án định hướng phát triển năng lực, thời lượng 45 phút. Tích hợp hoạt động trò chơi Kahoot ở phần củng cố kiến thức...</p>
+                <div class="text-xs text-gray-500 flex items-center justify-between mt-auto">
+                    <span>Đăng bởi: Lê Đại Số</span>
+                    <span>07/09/2026</span>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button class="text-gray-500 hover:text-gray-700 text-sm font-medium">Xem chi tiết</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div x-show="showRejectModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            
+            <div x-show="showRejectModal" x-transition.opacity class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            <div x-show="showRejectModal" x-transition class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">
+                        Từ chối: <span x-text="rejectItem" class="font-semibold text-red-600"></span>
+                    </h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Lý do từ chối <span class="text-red-500">*</span></label>
+                        <div class="mt-1">
+                            <textarea x-model="rejectReason" rows="4" class="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Vui lòng nhập lý do để tác giả có thể chỉnh sửa..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" @click="showRejectModal = false; rejectReason = ''" :disabled="!rejectReason" :class="!rejectReason ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Xác nhận Từ chối
+                    </button>
+                    <button type="button" @click="showRejectModal = false; rejectReason = ''" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

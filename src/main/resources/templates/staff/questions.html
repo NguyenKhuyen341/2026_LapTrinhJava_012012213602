@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Ngân hàng Câu hỏi - PlanbookAI</title>
+</head>
+<body>
+<div layout:fragment="content" class="space-y-6" x-data="questionBank()">
+    <!-- Header & Filter -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200 gap-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <select class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <option>Tất cả chủ đề</option>
+                <option>Hóa học Hữu cơ</option>
+                <option>Hóa học Vô cơ</option>
+            </select>
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Dễ</button>
+                <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Trung bình</button>
+                <button class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">Khó</button>
+                <button class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Rất khó</button>
+            </div>
+            <input type="text" placeholder="Tìm kiếm câu hỏi..." class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <button @click="openModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 shadow-sm font-medium whitespace-nowrap">
+            + Thêm câu hỏi
+        </button>
+    </div>
+
+    <!-- Questions List -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col space-y-4">
+            <div class="flex justify-between items-start">
+                <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-medium">Trung bình</span>
+                <span class="text-sm text-gray-500 font-medium">Hóa học Vô cơ</span>
+            </div>
+            <p class="text-gray-800 font-medium flex-grow">Cho 0,1 mol hỗn hợp X gồm hai anđehit no, đơn chức... Hỏi khối lượng kết tủa thu được là bao nhiêu?</p>
+            <div class="flex justify-end space-x-2 mt-4 pt-4 border-t border-gray-100">
+                <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Sửa</button>
+                <button class="text-red-600 hover:text-red-900 text-sm font-medium">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Question Modal -->
+    <div x-show="openModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto" @click.away="openModal = false">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-gray-800">Thêm Câu Hỏi Mới</h2>
+                <button @click="openModal = false" class="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Chủ đề</label>
+                        <select class="w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <option>Hóa học Hữu cơ</option>
+                            <option>Hóa học Vô cơ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mức độ khó</label>
+                        <select class="w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="DE">Dễ</option>
+                            <option value="TRUNG_BINH">Trung bình</option>
+                            <option value="KHO">Khó</option>
+                            <option value="RAT_KHO">Rất khó</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Chemistry Palette -->
+                <div class="bg-gray-50 p-2 rounded border border-gray-200 flex flex-wrap gap-2 items-center">
+                    <span class="text-sm text-gray-600 font-medium mr-2">Chèn nhanh:</span>
+                    <button @click="insertText('mol')" class="px-2 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-100">mol</button>
+                    <button @click="insertText('↓')" class="px-2 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-100">↓ kết tủa</button>
+                    <button @click="insertText('↑')" class="px-2 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-100">↑ bay hơi</button>
+                    <button @click="insertText('→')" class="px-2 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-100">→ phản ứng</button>
+                    <button @click="insertText('Δ')" class="px-2 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-100">Δ nhiệt</button>
+                </div>
+
+                <!-- Editor & Preview Side-by-side -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung câu hỏi</label>
+                        <textarea x-model="questionContent" id="questionEditor" rows="6" class="w-full border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm" placeholder="Nhập nội dung... Hỗ trợ KaTeX $$...$$"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Xem trước (KaTeX)</label>
+                        <div x-html="renderKatex(questionContent)" class="w-full h-36 border border-gray-300 rounded-md p-3 bg-gray-50 overflow-y-auto prose prose-sm max-w-none"></div>
+                    </div>
+                </div>
+
+                <!-- Answer Options -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-gray-700">Đáp án</label>
+                    <template x-for="opt in ['A', 'B', 'C', 'D']" :key="opt">
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="correctAnswer" :value="opt" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 cursor-pointer">
+                            <span x-text="opt + ':'" class="font-medium text-gray-700 w-6"></span>
+                            <input type="text" class="flex-grow border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" :placeholder="'Nội dung đáp án ' + opt">
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50 rounded-b-xl">
+                <button @click="openModal = false" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 font-medium">Hủy</button>
+                <button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium shadow-sm">Lưu câu hỏi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        function questionBank() {
+            return {
+                openModal: false,
+                questionContent: 'Ví dụ: Tính khối lượng kết tủa khi cho 0.1 mol $CO_2$ vào nước vôi trong.',
+                renderKatex(text) {
+                    if (!text) return '';
+                    if (typeof katex === 'undefined') return text;
+                    try {
+                        return text.replace(/\$(.*?)\$/g, (match, math) => {
+                            return katex.renderToString(math, { throwOnError: false });
+                        });
+                    } catch(e) {
+                        return text;
+                    }
+                },
+                insertText(text) {
+                    const el = document.getElementById('questionEditor');
+                    const start = el.selectionStart;
+                    const end = el.selectionEnd;
+                    this.questionContent = this.questionContent.substring(0, start) + text + this.questionContent.substring(end);
+                    setTimeout(() => { 
+                        el.focus(); 
+                        el.selectionStart = el.selectionEnd = start + text.length; 
+                    }, 10);
+                }
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

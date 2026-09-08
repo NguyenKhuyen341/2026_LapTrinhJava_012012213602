@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Quản lý Gói & Đơn hàng</title>
+</head>
+<body>
+<div layout:fragment="content" x-data="{ currentTab: 'packages' }">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Gói Dịch vụ & Đơn hàng</h1>
+            <p class="text-sm text-gray-500 mt-1">Quản lý các gói thuê bao và lịch sử giao dịch</p>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button @click="currentTab = 'packages'"
+                    :class="currentTab === 'packages' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                Gói dịch vụ
+            </button>
+            <button @click="currentTab = 'orders'"
+                    :class="currentTab === 'orders' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                Đơn hàng
+            </button>
+        </nav>
+    </div>
+
+    <!-- Gói Dịch vụ Tab -->
+    <div x-show="currentTab === 'packages'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Miễn phí -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-6 flex-1">
+                <h2 class="text-xl font-bold text-gray-900 text-center">Miễn phí</h2>
+                <p class="mt-4 text-center">
+                    <span class="text-4xl font-extrabold text-gray-900">0đ</span>
+                    <span class="text-base font-medium text-gray-500">/tháng</span>
+                </p>
+                <div class="mt-2 text-center text-sm text-gray-500 font-medium">Đang có 2,450 người dùng</div>
+                <ul class="mt-6 space-y-4">
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Tạo tối đa 5 giáo án/tháng</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Truy cập ngân hàng câu hỏi cơ bản</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <span class="ml-3 text-sm text-gray-400">Không có xuất file PDF/Word</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 text-center">
+                <button class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">Chỉnh sửa</button>
+            </div>
+        </div>
+
+        <!-- Cơ bản -->
+        <div class="bg-white rounded-xl shadow-sm border border-indigo-500 overflow-hidden flex flex-col relative">
+            <div class="absolute top-0 right-0 -mr-1 -mt-1 w-16 h-16 overflow-hidden">
+                <div class="absolute transform rotate-45 bg-indigo-500 text-white text-xs font-semibold py-1 right-[-35px] top-[32px] w-[170px] text-center">Phổ biến</div>
+            </div>
+            <div class="p-6 flex-1">
+                <h2 class="text-xl font-bold text-gray-900 text-center">Cơ bản</h2>
+                <p class="mt-4 text-center">
+                    <span class="text-4xl font-extrabold text-gray-900">50k</span>
+                    <span class="text-base font-medium text-gray-500">/tháng</span>
+                </p>
+                <div class="mt-2 text-center text-sm text-gray-500 font-medium">Đang có 1,200 người dùng</div>
+                <ul class="mt-6 space-y-4">
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Tạo tối đa 30 giáo án/tháng</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Truy cập đầy đủ ngân hàng câu hỏi</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Xuất file PDF/Word</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="p-4 bg-indigo-50 border-t border-indigo-100 text-center">
+                <button class="text-indigo-700 hover:text-indigo-900 font-medium text-sm">Chỉnh sửa</button>
+            </div>
+        </div>
+
+        <!-- VIP -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-6 flex-1">
+                <h2 class="text-xl font-bold text-gray-900 text-center">VIP</h2>
+                <p class="mt-4 text-center">
+                    <span class="text-4xl font-extrabold text-gray-900">100k</span>
+                    <span class="text-base font-medium text-gray-500">/tháng</span>
+                </p>
+                <div class="mt-2 text-center text-sm text-gray-500 font-medium">Đang có 500 người dùng</div>
+                <ul class="mt-6 space-y-4">
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Tạo giáo án <strong>không giới hạn</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Tất cả tính năng của gói Cơ bản</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="flex-shrink-0 h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3 text-sm text-gray-700">Hỗ trợ ưu tiên 24/7</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200 text-center">
+                <button class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">Chỉnh sửa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đơn hàng Tab -->
+    <div x-show="currentTab === 'orders'" style="display: none;" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <input type="text" placeholder="Tìm mã đơn hàng..." class="border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-64">
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Đơn</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gói</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số tiền</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-999</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Giáo viên X</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Gói VIP</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100.000đ</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">09/09/2026</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Đã thanh toán</span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-998</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Giáo viên Y</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Gói Cơ bản</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">50.000đ</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">08/09/2026</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Chờ thanh toán</span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#ORD-997</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Giáo viên Z</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Gói VIP</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100.000đ</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">07/09/2026</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Thất bại</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

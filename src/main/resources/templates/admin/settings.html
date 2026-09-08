@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Cấu hình Hệ thống</title>
+</head>
+<body>
+<div layout:fragment="content" x-data="{ showToast: false }">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Cấu hình Hệ thống</h1>
+        <p class="text-sm text-gray-500 mt-1">Quản lý các thiết lập chung, email và bảo mật</p>
+    </div>
+
+    <div class="space-y-6">
+        <!-- Cấu hình chung -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Cấu hình chung</h2>
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                <div class="sm:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">Tên hệ thống</label>
+                    <div class="mt-1">
+                        <input type="text" value="PlanbookAI" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Mô tả</label>
+                    <div class="mt-1">
+                        <textarea rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md">Hệ thống tạo giáo án thông minh</textarea>
+                    </div>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Logo</label>
+                    <div class="mt-1 flex items-center">
+                        <span class="h-12 w-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                            <svg class="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </span>
+                        <button type="button" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Đổi logo
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end">
+                <button type="button" @click="showToast = true; setTimeout(() => showToast = false, 3000)" class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Lưu cấu hình
+                </button>
+            </div>
+        </div>
+
+        <!-- Cấu hình Email -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Cấu hình Email (SMTP)</h2>
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                <div class="sm:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">SMTP Server</label>
+                    <div class="mt-1">
+                        <input type="text" value="smtp.gmail.com" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                </div>
+                <div class="sm:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">Port</label>
+                    <div class="mt-1">
+                        <input type="number" value="587" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                </div>
+                <div class="sm:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <div class="mt-1">
+                        <input type="text" value="noreply@planbook.ai" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end">
+                <button type="button" @click="showToast = true; setTimeout(() => showToast = false, 3000)" class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Lưu cấu hình
+                </button>
+            </div>
+        </div>
+
+        <!-- Cấu hình Bảo mật -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4 border-b pb-2">Cấu hình Bảo mật</h2>
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                <div class="sm:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">Thời gian hết hạn JWT (phút)</label>
+                    <div class="mt-1">
+                        <input type="number" value="60" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                </div>
+                <div class="sm:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">Số lần đăng nhập sai tối đa</label>
+                    <div class="mt-1">
+                        <input type="number" value="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end">
+                <button type="button" @click="showToast = true; setTimeout(() => showToast = false, 3000)" class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Lưu cấu hình
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div x-show="showToast" x-transition style="display: none;" class="fixed bottom-5 right-5 z-50">
+        <div class="bg-green-50 border-l-4 border-green-400 p-4 shadow-md rounded-r-md">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">
+                        Đã lưu cấu hình thành công.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
