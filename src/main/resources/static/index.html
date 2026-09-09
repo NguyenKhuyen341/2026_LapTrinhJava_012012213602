@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PlanbookAI - Nền Tảng Quản Lý Giáo Án & Đề Thi Thông Minh</title>
-  
+
   <!-- Modern Font & Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
   <!-- Ambient Glow Effects -->
@@ -81,11 +83,12 @@
 
       <!-- Content Views Container -->
       <div class="content-body">
-        
+
         <!-- TAB 1: DASHBOARD -->
         <section id="tab-dashboard" class="tab-view active">
           <h1 class="page-title">Bảng Điều Khiển Tổng Quan</h1>
-          <p class="page-desc">Chào mừng quay trở lại, ThS. Nguyễn Văn An! Dưới đây là tóm tắt hoạt động hệ thống PlanbookAI.</p>
+          <p class="page-desc">Chào mừng quay trở lại, ThS. Nguyễn Văn An! Dưới đây là tóm tắt hoạt động hệ thống
+            PlanbookAI.</p>
 
           <div class="stats-grid">
             <div class="stat-card">
@@ -143,7 +146,8 @@
           </div>
 
           <div class="filter-bar">
-            <input type="text" id="search-giaoan" class="form-control" placeholder="Lọc theo tên bài học..." style="width: 280px;">
+            <input type="text" id="search-giaoan" class="form-control" placeholder="Lọc theo tên bài học..."
+              style="width: 280px;">
             <select class="filter-select">
               <option value="ALL">Tất cả môn học</option>
               <option value="JAVA">Lập trình Java</option>
@@ -193,7 +197,7 @@
                   <th>Mã Đề</th>
                   <th>Tiêu Đề Bài Thi / Kiểm Tra</th>
                   <th>Thời Gian</th>
-                  <th>Số Câu Hoi</th>
+                  <th>Số Câu Hỏi</th>
                   <th>Trạng Thái</th>
                   <th>Ngày Tạo</th>
                   <th>Thao Tác</th>
@@ -242,7 +246,9 @@
 
             <div class="form-group">
               <label for="ai-prompt-input">Nhập chủ đề bài học hoặc môn học bạn muốn biên soạn:</label>
-              <input type="text" id="ai-prompt-input" class="form-control" value="Cấu trúc Lập trình Hướng đối tượng OOP trong Java" placeholder="Ví dụ: Vòng lặp For trong Java, Thuật toán sắp xếp...">
+              <input type="text" id="ai-prompt-input" class="form-control"
+                value="Cấu trúc Lập trình Hướng đối tượng OOP trong Java"
+                placeholder="Ví dụ: Vòng lặp For trong Java, Thuật toán sắp xếp...">
             </div>
 
             <button class="btn btn-primary" id="btn-generate-ai">
@@ -250,7 +256,7 @@
             </button>
 
             <div class="ai-output-box" id="ai-output-box">
-Kết quả sinh từ AI sẽ xuất hiện tại đây... Hãy nhập chủ đề và nhấn nút Sinh Giáo Án.
+              Kết quả sinh từ AI sẽ xuất hiện tại đây... Hãy nhập chủ đề và nhấn nút Sinh Giáo Án.
             </div>
           </div>
         </section>
@@ -267,7 +273,7 @@ Kết quả sinh từ AI sẽ xuất hiện tại đây... Hãy nhập chủ đ�
         <button class="modal-close" id="btn-close-auth">&times;</button>
       </div>
 
-      <form onsubmit="event.preventDefault(); alert('Đã ghi nhận thao tác đăng nhập mẫu trên FE!');">
+      <form onsubmit="event.preventDefault(); alert('Đăng Nhập Thành Công!');">
         <div class="form-group">
           <label>Tên đăng nhập / Email:</label>
           <input type="text" class="form-control" placeholder="teacher@planbookai.com" value="teacher1">
@@ -279,7 +285,8 @@ Kết quả sinh từ AI sẽ xuất hiện tại đây... Hãy nhập chủ đ�
 
         <div style="display: flex; gap: 12px; margin-top: 24px;">
           <button type="submit" class="btn btn-primary" style="flex: 1;">Đăng Nhập</button>
-          <button type="button" class="btn btn-secondary" onclick="document.getElementById('auth-modal').classList.remove('active')">Đóng</button>
+          <button type="button" class="btn btn-secondary"
+            onclick="document.getElementById('auth-modal').classList.remove('active')">Đóng</button>
         </div>
       </form>
     </div>
@@ -289,4 +296,5 @@ Kết quả sinh từ AI sẽ xuất hiện tại đây... Hãy nhập chủ đ�
   <script src="js/mock-data.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>

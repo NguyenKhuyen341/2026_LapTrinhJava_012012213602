@@ -46,7 +46,7 @@ function renderGiaoAnTable(filterText = '') {
   const tbody = document.getElementById('giaoan-tbody');
   if (!tbody) return;
 
-  const filtered = mockData.giaoAnList.filter(item => 
+  const filtered = mockData.giaoAnList.filter(item =>
     item.tenBaiHoc.toLowerCase().includes(filterText.toLowerCase()) ||
     item.monHoc.toLowerCase().includes(filterText.toLowerCase())
   );
@@ -60,7 +60,9 @@ function renderGiaoAnTable(filterText = '') {
       <td><span class="badge ${getStatusBadgeClass(item.trangThai)}">${item.trangThai}</span></td>
       <td>${item.ngayTao}</td>
       <td>
-        <button class="btn btn-secondary btn-sm" onclick="viewGiaoAnDetail(${item.id})">👁️ Xem</button>
+        <button class="btn btn-secondary btn-sm" onclick="viewGiaoAnDetail(${item.id})"> Xem </button>
+        <button class="btn btn-secondary btn-sm" onclick="viewGiaoAnDetail(${item.id})"> Xóa </button>
+        <button class="btn btn-secondary btn-sm" onclick="viewGiaoAnDetail(${item.id})"> Sửa </button>
       </td>
     </tr>
   `).join('');
@@ -124,7 +126,7 @@ function initAiGenerator() {
           + `📝 CÂU HỎI ĐỀ XUẤT TỰ ĐỘNG:\n`
           + ` Q1: Hãy phân biệt sự khác nhau giữa vòng lặp while và do-while?\n`
           + ` Q2: Viết chương trình in ra danh sách các số nguyên tố nhỏ hơn 100.`;
-        
+
         btnGenerate.disabled = false;
         btnGenerate.innerHTML = '✨ AI Sinh Giáo Án Tự Động';
       }, 1200);
@@ -171,7 +173,7 @@ function getStatusBadgeClass(status) {
 }
 
 function escapeHtml(str) {
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
